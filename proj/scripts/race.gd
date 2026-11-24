@@ -30,6 +30,8 @@ var lbl_count: Label
 var lbl_item: Label
 var lbl_msg: Label
 var item_view: SubViewport
+var mirror_view: SubViewport
+var mirror_cam: Camera3D
 var item_holder: Node3D
 var item_panel: Control
 var pause_layer: CanvasLayer
@@ -233,9 +235,9 @@ func _build_hud() -> void:
 	sb.set_border_width_all(5)
 	sb.set_corner_radius_all(24)
 	item_panel.add_theme_stylebox_override("panel", sb)
-	item_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	item_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	item_panel.size = Vector2(150, 150)
-	item_panel.position = Vector2(-75, 14)
+	item_panel.position = Vector2(-150 - 130, 14)
 	item_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(item_panel)
 	var svc := SubViewportContainer.new()
@@ -271,6 +273,38 @@ func _build_hud() -> void:
 	lbl_item.position = Vector2(0, 112)
 	lbl_item.size = Vector2(150, 30)
 	item_panel.add_child(lbl_item)
+
+	# rear-view mirror (top centre)
+	var mframe := Panel.new()
+	var msb := StyleBoxFlat.new()
+	msb.bg_color = Color(0.1, 0.1, 0.12)
+	msb.border_color = Color(0.12, 0.12, 0.14)
+	msb.set_border_width_all(8)
+	msb.set_corner_radius_all(26)
+	mframe.add_theme_stylebox_override("panel", msb)
+	mframe.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	mframe.size = Vector2(380, 120)
+	mframe.position = Vector2(-190, 10)
+	mframe.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(mframe)
+	mirror_view = SubViewport.new()
+	mirror_view.size = Vector2i(364, 104)
+	mirror_view.world_3d = get_viewport().world_3d
+	mirror_view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	mframe.add_child(mirror_view)
+	mirror_cam = Camera3D.new()
+	mirror_cam.fov = 55
+	mirror_cam.far = 120
+	mirror_view.add_child(mirror_cam)
+	mirror_cam.current = true
+	var mtex := TextureRect.new()
+	mtex.texture = mirror_view.get_texture()
+	mtex.flip_h = true
+	mtex.position = Vector2(8, 8)
+	mtex.size = Vector2(364, 104)
+	mtex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	mtex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mframe.add_child(mtex)
 
 	# touch controls
 	var controls := Node2D.new()
@@ -447,6 +481,9 @@ func _update_camera(dt: float, snap := false) -> void:
 	else:
 		cam.position = cam.position.lerp(target_pos, clampf(dt * 5.0, 0, 1))
 	cam.look_at(look)
+	if mirror_cam != null:
+		mirror_cam.position = player.position + h * 0.2 + Vector3.UP * 1.6
+		mirror_cam.look_at(player.position - h * 12.0 + Vector3.UP * 0.6)
 
 
 # ---------------------------------------------------------------- items
@@ -474,7 +511,7 @@ func _update_boxes(dt: float) -> void:
 func _roll_item(c: Car) -> String:
 	var rank := ranking.find(c)
 	if rank == 0:
-		return ["nails", "oil", "nails", "oil", "zap"][rng.randi() % 5]
+		return ["nails", "oil"][rng.randi() % 2]
 	if rank >= 3:
 		return ["rocket", "rocket", "zap", "zap", "nails", "oil"][rng.randi() % 6]
 	return ITEMS[rng.randi() % ITEMS.size()]
@@ -484,11 +521,15 @@ func use_item(c: Car) -> void:
 	if c.item == "" or c.is_stunned():
 		return
 	var it := c.item
-	c.item = ""
 	var rank := ranking.find(c)
+	if (it == "rocket" or it == "zap") and _car_ahead(c, 60.0) == null:
+		if c == player:
+			flash_message("NO CAR AHEAD!", 0.8)
+		return
+	c.item = ""
 	match it:
 		"rocket":
-			var target: Car = ranking[rank - 1] if rank > 0 else null
+			var target: Car = _car_ahead(c, 60.0)
 			var node := FX.make_rocket()
 			add_child(node)
 			var p := c.position + c.heading() * 1.8 + Vector3.UP * 0.7
@@ -511,7 +552,7 @@ func use_item(c: Car) -> void:
 					continue
 				var d := o.position.distance_to(c.position)
 				var ahead := o.progress() > c.progress()
-				if d < best and (ahead or rank == 0):
+				if d < best and ahead:
 					best = d
 					target = o
 			if target != null:
@@ -520,6 +561,20 @@ func use_item(c: Car) -> void:
 					_on_car_hit(target, "ZAPPED!")
 			else:
 				FX.burst(self, c.position + Vector3.UP, FX.TEX_SPARK, Color(0.5, 0.85, 1.0), 16, 1.2, 4.0, 0.5)
+
+
+## Nearest car ahead on the track (by race progress) within max_dist metres.
+func _car_ahead(c: Car, max_dist: float) -> Car:
+	var best: Car = null
+	var best_gap := INF
+	for o in cars:
+		if o == c or o.finished:
+			continue
+		var gap := o.progress() - c.progress()
+		if gap > 0.0 and gap < best_gap and o.position.distance_to(c.position) < max_dist:
+			best_gap = gap
+			best = o
+	return best
 
 
 func _update_rockets(dt: float) -> void:
