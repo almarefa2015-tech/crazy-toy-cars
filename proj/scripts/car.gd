@@ -44,10 +44,9 @@ var _blink := 0.0
 func setup(model_path: String) -> void:
 	pivot = Node3D.new()
 	add_child(pivot)
-	model = load(model_path).instantiate()
-	model.scale = Vector3.ONE * MODEL_SCALE
+	model = Game.make_car_model(model_path, 2.1)
 	pivot.add_child(model)
-	height = 0.45 * MODEL_SCALE
+	height = 1.2
 	pivot.position.y = height * 0.5
 	model.position.y = -height * 0.5
 	lane = randf_range(-1.8, 1.8)

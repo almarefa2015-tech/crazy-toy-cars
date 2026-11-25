@@ -106,7 +106,8 @@ func _build_boxes() -> void:
 
 func _build_cars(t: Dictionary) -> void:
 	var models := range(Game.CARS.size())
-	models.erase(Game.car_index)
+	if models.size() > 3:
+		models.erase(Game.car_index)
 	models.shuffle()
 	var names := AI_NAMES.duplicate()
 	names.shuffle()

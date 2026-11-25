@@ -158,8 +158,7 @@ func _change_car(d: int) -> void:
 	Game.save_data()
 	for ch in car_holder.get_children():
 		ch.queue_free()
-	var m: Node3D = load(Game.CARS[Game.car_index]["model"]).instantiate()
-	m.scale = Vector3.ONE * 1.9
+	var m: Node3D = Game.make_car_model(Game.CARS[Game.car_index]["model"], 1.9)
 	car_holder.add_child(m)
 	lbl_car.text = Game.CARS[Game.car_index]["name"]
 

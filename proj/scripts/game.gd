@@ -6,14 +6,9 @@ const SAVE_PATH := "user://save.cfg"
 const LAPS := 3
 
 const CARS := [
-	{"name": "Racer", "model": "res://models/toy/vehicle-racer.glb"},
-	{"name": "Speedster", "model": "res://models/toy/vehicle-speedster.glb"},
-	{"name": "Monster Truck", "model": "res://models/toy/vehicle-monster-truck.glb"},
-	{"name": "Drag Racer", "model": "res://models/toy/vehicle-drag-racer.glb"},
-	{"name": "Vintage Racer", "model": "res://models/toy/vehicle-vintage-racer.glb"},
-	{"name": "Low Racer", "model": "res://models/toy/vehicle-racer-low.glb"},
-	{"name": "Toy SUV", "model": "res://models/toy/vehicle-suv.glb"},
-	{"name": "Toy Truck", "model": "res://models/toy/vehicle-truck.glb"},
+	{"name": "Monster Red", "model": "res://models/ai/red.glb"},
+	{"name": "Blue Bolt", "model": "res://models/ai/blue.glb"},
+	{"name": "Jungle Jeep", "model": "res://models/ai/jeep.glb"},
 ]
 
 const TRACKS := [
@@ -97,6 +92,30 @@ func open_store_page() -> void:
 		OS.shell_open("market://details?id=" + PACKAGE)
 	else:
 		OS.shell_open("https://play.google.com/store/apps/details?id=" + PACKAGE)
+
+
+## Loads a car model and normalises it: 2 m long, wheels on the ground, centred.
+func make_car_model(path: String, length := 2.0) -> Node3D:
+	var holder := Node3D.new()
+	var m: Node3D = load(path).instantiate()
+	holder.add_child(m)
+	var aabb := AABB()
+	var first := true
+	for mi in m.find_children("*", "MeshInstance3D", true, false):
+		var xf: Transform3D = Transform3D.IDENTITY
+		var n: Node = mi
+		while n != null and n != holder:
+			if n is Node3D:
+				xf = (n as Node3D).transform * xf
+			n = n.get_parent()
+		var a: AABB = xf * (mi as MeshInstance3D).mesh.get_aabb()
+		aabb = a if first else aabb.merge(a)
+		first = false
+	var s := length / maxf(aabb.size.z, 0.001)
+	m.scale = Vector3.ONE * s
+	var c := aabb.get_center()
+	m.position = Vector3(-c.x * s, -aabb.position.y * s, -c.z * s)
+	return holder
 
 
 func place_text(p: int) -> String:
