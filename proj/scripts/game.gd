@@ -9,6 +9,7 @@ const CARS := [
 	{"name": "Monster Red", "model": "res://models/ai/red.glb"},
 	{"name": "Blue Bolt", "model": "res://models/ai/blue.glb"},
 	{"name": "Jungle Jeep", "model": "res://models/ai/jeep.glb"},
+	{"name": "Sand Buggy", "model": "res://models/ai/yellow.glb"},
 ]
 
 const TRACKS := [
