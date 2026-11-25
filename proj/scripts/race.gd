@@ -34,6 +34,14 @@ var mirror_view: SubViewport
 var mirror_cam: Camera3D
 var item_holder: Node3D
 var item_panel: Control
+var fire_icon: Sprite2D
+var weapon_label: Label
+const WEAPON_ICONS := {
+	"rocket": preload("res://ui/w_rocket.png"),
+	"nails": preload("res://ui/w_nails.png"),
+	"oil": preload("res://ui/w_oil.png"),
+	"zap": preload("res://ui/w_zap.png"),
+}
 var pause_layer: CanvasLayer
 var engine: AudioStreamPlayer
 var sfx_hit: AudioStreamPlayer
@@ -241,6 +249,7 @@ func _build_hud() -> void:
 	item_panel.position = Vector2(-150 - 130, 14)
 	item_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(item_panel)
+	item_panel.visible = false
 	var svc := SubViewportContainer.new()
 	svc.stretch = true
 	svc.position = Vector2(10, 6)
@@ -313,7 +322,15 @@ func _build_hud() -> void:
 	hud.add_child(controls)
 	controls.add_child(_touch_button("res://ui/direction_left.png", "steer_left", Vector2.ZERO, 1.25))
 	controls.add_child(_touch_button("res://ui/direction_right.png", "steer_right", Vector2.ZERO, 1.25))
-	controls.add_child(_touch_button("res://ui/button_circle.png", "fire", Vector2.ZERO, 1.45, "res://ui/icon_fire.png"))
+	var fire_btn := _touch_button("res://ui/button_circle.png", "fire", Vector2.ZERO, 1.7)
+	fire_icon = Sprite2D.new()
+	fire_icon.position = Vector2(64, 64)
+	fire_btn.add_child(fire_icon)
+	controls.add_child(fire_btn)
+	weapon_label = _label(26, Color(1, 0.9, 0.3))
+	weapon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	weapon_label.size = Vector2(240, 36)
+	root.add_child(weapon_label)
 	controls.add_child(_touch_button("res://ui/button_circle.png", "pause", Vector2.ZERO, 0.8, "res://ui/icon_pause.png"))
 	get_viewport().size_changed.connect(_layout_controls)
 	_layout_controls()
@@ -330,7 +347,8 @@ func _layout_controls() -> void:
 	bl.position = Vector2(30, vs.y - s.y - 30)
 	br.position = Vector2(30 + s.x + 40, vs.y - s.y - 30)
 	var fs := fire.texture_normal.get_size() * fire.scale
-	fire.position = Vector2(vs.x - fs.x - 40, vs.y - fs.y - 40)
+	fire.position = Vector2(vs.x - fs.x - 40, vs.y - fs.y - 60)
+	weapon_label.position = Vector2(fire.position.x + fs.x * 0.5 - 120, vs.y - 56)
 	var ps := pau.texture_normal.get_size() * pau.scale
 	pau.position = Vector2(vs.x - ps.x - 24, 20)
 
@@ -339,6 +357,19 @@ func _show_item_preview(item: String) -> void:
 	if item == _shown_item:
 		return
 	_shown_item = item
+	var fire_btn := fire_icon.get_parent() as TouchScreenButton
+	if item == "":
+		fire_icon.texture = null
+		weapon_label.text = ""
+		fire_btn.modulate = Color(1, 1, 1, 0.35)
+	else:
+		fire_icon.texture = WEAPON_ICONS[item]
+		fire_icon.scale = Vector2.ONE * (112.0 / 256.0)
+		weapon_label.text = "TAP: " + ITEM_NAMES[item]
+		fire_btn.modulate = Color(1, 1, 1, 1)
+		fire_icon.scale *= 0.3
+		fire_icon.create_tween().tween_property(fire_icon, "scale", Vector2.ONE * (112.0 / 256.0), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		flash_message("GOT " + ITEM_NAMES[item] + "!", 1.2)
 	for ch in item_holder.get_children():
 		ch.queue_free()
 	lbl_item.text = ITEM_NAMES.get(item, "")
@@ -385,7 +416,7 @@ func _process(delta: float) -> void:
 		b["node"].position.y = 0.5 + sin(Time.get_ticks_msec() * 0.003 + b["pos"].x) * 0.15
 	# engine pitch
 	if engine:
-		engine.pitch_scale = lerpf(engine.pitch_scale, 0.6 + absf(player.speed) / player.max_speed * 1.6, delta * 3)
+		engine.pitch_scale = lerpf(engine.pitch_scale, 0.6 + absf(player.speed) / maxf(player.max_speed, 1.0) * 1.6, delta * 3)
 	if Input.is_action_just_pressed("pause") and state != "finished":
 		_toggle_pause()
 

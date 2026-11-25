@@ -141,7 +141,7 @@ func step(dt: float, racing: bool) -> void:
 	rotation.y = yaw
 	# body lean
 	if stun <= 0.0:
-		pivot.rotation.z = lerp_angle(pivot.rotation.z, steer * 0.08 * clampf(speed / max_speed, 0, 1), 8 * dt)
+		pivot.rotation.z = lerp_angle(pivot.rotation.z, steer * 0.08 * clampf(speed / maxf(max_speed, 1.0), 0, 1), 8 * dt)
 
 
 ## Simple racing AI

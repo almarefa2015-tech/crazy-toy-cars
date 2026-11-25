@@ -30,7 +30,7 @@ func _autotest(args: PackedStringArray) -> void:
 		r.player.ai = true
 	var shots := [[4.5, ""], [2.0, "rocket"], [0.25, ""], [0.5, "nails"], [0.7, ""], [1.0, ""], [1.0, "zap"], [0.15, ""], [3.0, "oil"], [0.3, ""], [6.0, "finish"], [3.5, ""], [1.5, ""]]
 	if args.has("--fx"):
-		shots = [[4.5, "freeze"], [0.1, "rocket"], [0.1, ""], [0.1, ""], [0.15, ""], [0.3, ""], [0.3, "nails"], [0.25, ""], [0.3, ""], [0.5, ""], [0.8, ""], [0.5, ""], [0.6, "oil"], [0.5, "zap"], [0.1, ""]]
+		shots = [[4.5, "freeze"], [0.5, "give"], [0.6, ""], [0.1, "rocket"], [0.1, ""], [0.1, ""], [0.15, ""], [0.3, ""], [0.3, "nails"], [0.25, ""], [0.3, ""], [0.5, ""], [0.8, ""], [0.5, ""], [0.6, "oil"], [0.5, "zap"], [0.1, ""]]
 	var k := 0
 	for sdef in shots:
 		await get_tree().create_timer(sdef[0]).timeout
@@ -51,6 +51,8 @@ func _autotest(args: PackedStringArray) -> void:
 					c.item = ""
 				r.boxes.clear()
 				r.player.position += r.player.heading() * -6.0
+			"give":
+				r.player.item = "rocket"
 			"finish":
 				r.player.lap = Game.LAPS + 1
 		get_viewport().get_texture().get_image().save_png(out + "/shot_%02d_%s.png" % [k, sdef[1]])
