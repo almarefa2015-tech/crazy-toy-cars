@@ -195,7 +195,7 @@ func _touch_button(tex_path: String, action: String, pos: Vector2, scale_f: floa
 	b.action = action
 	b.position = pos
 	b.scale = Vector2.ONE * scale_f
-	b.modulate = Color(1, 1, 1, 0.85)
+	b.modulate = Color(1, 1, 1, 0.95)
 	if icon_path != "":
 		var ic := Sprite2D.new()
 		ic.texture = load(icon_path)
@@ -320,11 +320,11 @@ func _build_hud() -> void:
 	var controls := Node2D.new()
 	controls.name = "Controls"
 	hud.add_child(controls)
-	controls.add_child(_touch_button("res://ui/direction_left.png", "steer_left", Vector2.ZERO, 1.25))
-	controls.add_child(_touch_button("res://ui/direction_right.png", "steer_right", Vector2.ZERO, 1.25))
-	var fire_btn := _touch_button("res://ui/button_circle.png", "fire", Vector2.ZERO, 1.7)
+	controls.add_child(_touch_button("res://ui/btn_left.png", "steer_left", Vector2.ZERO, 0.62))
+	controls.add_child(_touch_button("res://ui/btn_right.png", "steer_right", Vector2.ZERO, 0.62))
+	var fire_btn := _touch_button("res://ui/btn_fire.png", "fire", Vector2.ZERO, 0.85)
 	fire_icon = Sprite2D.new()
-	fire_icon.position = Vector2(64, 64)
+	fire_icon.position = Vector2(128, 128)
 	fire_btn.add_child(fire_icon)
 	controls.add_child(fire_btn)
 	weapon_label = _label(26, Color(1, 0.9, 0.3))
@@ -345,7 +345,7 @@ func _layout_controls() -> void:
 	var pau: TouchScreenButton = c.get_child(3)
 	var s := bl.texture_normal.get_size() * bl.scale
 	bl.position = Vector2(30, vs.y - s.y - 30)
-	br.position = Vector2(30 + s.x + 40, vs.y - s.y - 30)
+	br.position = Vector2(30 + s.x + 30, vs.y - s.y - 30)
 	var fs := fire.texture_normal.get_size() * fire.scale
 	fire.position = Vector2(vs.x - fs.x - 40, vs.y - fs.y - 60)
 	weapon_label.position = Vector2(fire.position.x + fs.x * 0.5 - 120, vs.y - 56)
@@ -364,11 +364,11 @@ func _show_item_preview(item: String) -> void:
 		fire_btn.modulate = Color(1, 1, 1, 0.35)
 	else:
 		fire_icon.texture = WEAPON_ICONS[item]
-		fire_icon.scale = Vector2.ONE * (112.0 / 256.0)
+		fire_icon.scale = Vector2.ONE * (140.0 / 256.0)
 		weapon_label.text = "TAP: " + ITEM_NAMES[item]
 		fire_btn.modulate = Color(1, 1, 1, 1)
 		fire_icon.scale *= 0.3
-		fire_icon.create_tween().tween_property(fire_icon, "scale", Vector2.ONE * (112.0 / 256.0), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		fire_icon.create_tween().tween_property(fire_icon, "scale", Vector2.ONE * (140.0 / 256.0), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		flash_message("GOT " + ITEM_NAMES[item] + "!", 1.2)
 	for ch in item_holder.get_children():
 		ch.queue_free()
@@ -381,8 +381,8 @@ func _show_item_preview(item: String) -> void:
 			n.scale = Vector3.ONE * 1.6
 			n.rotation = Vector3(0.2, PI / 2.0, 0.3)
 		"nails":
-			n = FX.make_nails(rng, 4, 0.35)
-			n.scale = Vector3.ONE * 1.3
+			n = FX.make_nails()
+			n.position.y = -0.4
 		"oil":
 			n = FX.make_oil()
 			n.scale = Vector3.ONE * 0.6
@@ -514,8 +514,8 @@ func _update_camera(dt: float, snap := false) -> void:
 		cam.position = cam.position.lerp(target_pos, clampf(dt * 5.0, 0, 1))
 	cam.look_at(look)
 	if mirror_cam != null:
-		mirror_cam.position = player.position + h * 0.2 + Vector3.UP * 1.6
-		mirror_cam.look_at(player.position - h * 12.0 + Vector3.UP * 0.6)
+		mirror_cam.position = player.position - h * 1.3 + Vector3.UP * 2.2
+		mirror_cam.look_at(player.position - h * 14.0 + Vector3.UP * 0.8)
 
 
 # ---------------------------------------------------------------- items

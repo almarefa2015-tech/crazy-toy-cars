@@ -43,6 +43,8 @@ func _autotest(args: PackedStringArray) -> void:
 				r.player.item = "zap"; r.use_item(r.player)
 			"oil":
 				r.player.item = "oil"; r.use_item(r.player)
+				r.player.item = "nails"; r.player.position += r.player.heading() * 4.0; r.use_item(r.player)
+				r.player.position -= r.player.heading() * 12.0
 			"freeze":
 				for c in r.cars:
 					c.max_speed = 0.0

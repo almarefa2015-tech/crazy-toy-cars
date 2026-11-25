@@ -9,9 +9,9 @@ const TEX_FLAME := preload("res://fx/flame_01.png")
 const TEX_STAR := preload("res://fx/star_04.png")
 const TEX_GLOW := preload("res://fx/circle_05.png")
 
+const NAILS_TEX := preload("res://fx/nails_decal.png")
+const OIL_TEX := preload("res://fx/oil_decal.png")
 const ROCKET_MODEL := preload("res://models/ai/rocket.glb")
-const BOLT := preload("res://models/cars/debris-bolt.glb")
-const NUT := preload("res://models/cars/debris-nut.glb")
 
 
 static func sprite_mat(tex: Texture2D, col: Color, additive := true) -> StandardMaterial3D:
@@ -113,35 +113,36 @@ static func make_rocket() -> Node3D:
 	return holder
 
 
-static func make_nails(rng: RandomNumberGenerator, count := 6, spread := 1.3) -> Node3D:
+static func make_nails(_rng: RandomNumberGenerator = null, _count := 6, _spread := 1.3) -> Node3D:
+	## Khaled's nails art as an upright sticker on the road.
 	var n := Node3D.new()
-	for i in count:
-		var b: Node3D = (BOLT if i % 3 != 2 else NUT).instantiate()
-		b.scale = Vector3.ONE * 2.6
-		b.position = Vector3(rng.randf_range(-spread, spread), 0.05, rng.randf_range(-spread, spread))
-		b.rotation = Vector3(rng.randf_range(-1.4, 1.4), rng.randf_range(0, TAU), rng.randf_range(-1.4, 1.4))
-		n.add_child(b)
+	var sp := Sprite3D.new()
+	sp.texture = NAILS_TEX
+	sp.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	sp.pixel_size = 1.6 / 512.0
+	sp.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sp.shaded = false
+	sp.position.y = 0.7
+	n.add_child(sp)
 	return n
 
 
 static func make_oil() -> Node3D:
+	## Khaled's oil puddle art laid flat on the road.
 	var n := Node3D.new()
-	for i in 2:
-		var mi := MeshInstance3D.new()
-		var q := QuadMesh.new()
-		q.size = Vector2(3.8, 3.8) if i == 0 else Vector2(2.2, 2.2)
-		q.orientation = PlaneMesh.FACE_Y
-		mi.mesh = q
-		var m := StandardMaterial3D.new()
-		m.albedo_texture = TEX_SMOKE if i == 0 else TEX_GLOW
-		m.albedo_color = Color(0.03, 0.03, 0.05, 0.95) if i == 0 else Color(0.25, 0.2, 0.45, 0.6)
-		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.metallic = 0.6
-		m.roughness = 0.08
-		mi.material_override = m
-		mi.position.y = 0.03 + i * 0.01
-		mi.rotation.y = randf() * TAU
-		n.add_child(mi)
+	var mi := MeshInstance3D.new()
+	var q := QuadMesh.new()
+	q.size = Vector2(3.6, 3.6)
+	q.orientation = PlaneMesh.FACE_Y
+	mi.mesh = q
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = OIL_TEX
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mi.material_override = m
+	mi.position.y = 0.04
+	mi.rotation.y = randf() * TAU
+	n.add_child(mi)
 	return n
 
 
