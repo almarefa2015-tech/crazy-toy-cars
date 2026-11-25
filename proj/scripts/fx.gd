@@ -9,9 +9,7 @@ const TEX_FLAME := preload("res://fx/flame_01.png")
 const TEX_STAR := preload("res://fx/star_04.png")
 const TEX_GLOW := preload("res://fx/circle_05.png")
 
-const ROCKET_FINS := preload("res://models/rocket/rocket_finsA.glb")
-const ROCKET_FUEL := preload("res://models/rocket/rocket_fuelA.glb")
-const ROCKET_TOP := preload("res://models/rocket/rocket_topA.glb")
+const ROCKET_MODEL := preload("res://models/ai/rocket.glb")
 const BOLT := preload("res://models/cars/debris-bolt.glb")
 const NUT := preload("res://models/cars/debris-nut.glb")
 
@@ -106,21 +104,12 @@ static func zap_effect(parent: Node, a: Vector3, b: Vector3) -> void:
 
 
 static func make_rocket() -> Node3D:
-	## Kenney Space Kit rocket parts stacked, then laid horizontal (nose = +Z).
-	var r := Node3D.new()
-	var stack := Node3D.new()
-	r.add_child(stack)
-	var y := 0.0
-	for pair in [[ROCKET_FINS, 0.7], [ROCKET_FUEL, 0.5], [ROCKET_TOP, 0.8]]:
-		var part: Node3D = pair[0].instantiate()
-		part.position = Vector3(-2.0, y, -1.5)
-		stack.add_child(part)
-		y += pair[1]
-	stack.position.y = -y * 0.5
+	## Khaled's firework rocket (AI-made 3D model). Model nose points -X; turn it to +Z.
 	var holder := Node3D.new()
+	var r: Node3D = ROCKET_MODEL.instantiate()
+	r.rotation.y = PI / 2.0
+	r.scale = Vector3.ONE * 0.7
 	holder.add_child(r)
-	r.rotation.x = PI / 2.0
-	r.scale = Vector3.ONE * 0.8
 	return holder
 
 

@@ -7,9 +7,11 @@ const LAPS := 3
 
 const CARS := [
 	{"name": "Monster Red", "model": "res://models/ai/red.glb"},
-	{"name": "Blue Bolt", "model": "res://models/ai/blue.glb"},
+	{"name": "Blue Bolt", "model": "res://models/ai/blue.glb", "yaw": -90.0},
 	{"name": "Jungle Jeep", "model": "res://models/ai/jeep.glb"},
 	{"name": "Sand Buggy", "model": "res://models/ai/yellow.glb"},
+	{"name": "Purple Flame", "model": "res://models/ai/purple.glb", "yaw": 90.0},
+	{"name": "Orange Rally", "model": "res://models/ai/orange.glb", "yaw": 90.0},
 ]
 
 const TRACKS := [
@@ -100,6 +102,9 @@ func make_car_model(path: String, length := 2.0) -> Node3D:
 	var holder := Node3D.new()
 	var m: Node3D = load(path).instantiate()
 	holder.add_child(m)
+	for c in CARS:
+		if c["model"] == path:
+			m.rotation.y = deg_to_rad(float(c.get("yaw", 0.0)))
 	var aabb := AABB()
 	var first := true
 	for mi in m.find_children("*", "MeshInstance3D", true, false):

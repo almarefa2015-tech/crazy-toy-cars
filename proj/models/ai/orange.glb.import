@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b7erv6t5ov5ml"
-path="res://.godot/imported/rocket_topA.glb-931778a908e59a97796a22913391b64a.scn"
+uid="uid://bxw02806ad6xm"
+path="res://.godot/imported/orange.glb-1632c0160587babea97186e64dc03e15.scn"
 
 [deps]
 
-source_file="res://models/rocket/rocket_topA.glb"
-dest_files=["res://.godot/imported/rocket_topA.glb-931778a908e59a97796a22913391b64a.scn"]
+source_file="res://models/ai/orange.glb"
+dest_files=["res://.godot/imported/orange.glb-1632c0160587babea97186e64dc03e15.scn"]
 
 [params]
 

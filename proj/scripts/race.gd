@@ -347,7 +347,7 @@ func _show_item_preview(item: String) -> void:
 	match item:
 		"rocket":
 			n = FX.make_rocket()
-			n.scale = Vector3.ONE * 1.4
+			n.scale = Vector3.ONE * 1.6
 			n.rotation = Vector3(0.2, PI / 2.0, 0.3)
 		"nails":
 			n = FX.make_nails(rng, 4, 0.35)
@@ -592,7 +592,8 @@ func _update_rockets(dt: float) -> void:
 		r["puff"] -= dt
 		if r["puff"] <= 0.0:
 			r["puff"] = 0.05
-			FX.burst(self, r["pos"] - r["dir"] * 0.8, FX.TEX_SMOKE, Color(1, 1, 1, 0.8), 2, 0.9, 0.5, 0.5, false)
+			FX.burst(self, r["pos"] - r["dir"] * 0.9, FX.TEX_SMOKE, Color(1, 1, 1, 0.8), 2, 0.9, 0.5, 0.5, false)
+			FX.burst(self, r["pos"] - r["dir"] * 0.9, FX.TEX_STAR, Color.from_hsv(randf(), 0.7, 1.0), 2, 0.5, 2.5, 0.4)
 		var done: bool = r["life"] <= 0.0
 		for c in cars:
 			if c == r["owner"]:
